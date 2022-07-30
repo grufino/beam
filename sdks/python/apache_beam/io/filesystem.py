@@ -102,7 +102,7 @@ class CompressionTypes(object):
         cls.BZIP2: 'application/x-bz2',
         cls.DEFLATE: 'application/x-deflate',
         cls.GZIP: 'application/x-gzip',
-        cls.ZSTD: 'application/x-zstd',
+        cls.ZSTD: 'application/zstd',
     }
     return mime_types_by_compression_type.get(compression_type, default)
 
@@ -178,6 +178,10 @@ class CompressedFile(object):
     elif self._compression_type == CompressionTypes.DEFLATE:
       self._decompressor = zlib.decompressobj()
     elif self._compression_type == CompressionTypes.ZSTD:
+      # hardcoded max_window_size to avoid too much memory
+      # errors when reading big files, please refer
+      # to the following issue for further explanation:
+      # https://github.com/indygreg/python-zstandard/issues/157
       self._decompressor = zstandard.ZstdDecompressor(
           max_window_size=2147483648).decompressobj()
     else:
